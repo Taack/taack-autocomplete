@@ -30,9 +30,9 @@ patchPluginXml {
 }
 
 signPlugin {
-    password = System.getenv("PRIVATE_KEY_PASSWORD")
-    certificateChain = new File('/home/auo/intellij/chain.crt').text
-    privateKey = new File('/home/auo/intellij/private.pem').text
+//    password = System.getenv("PRIVATE_KEY_PASSWORD")
+//    certificateChain = new File('/home/auo/intellij/chain.crt').text
+//    privateKey = new File('/home/auo/intellij/private.pem').text
 }
 
 
