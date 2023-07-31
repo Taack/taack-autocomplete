@@ -1,11 +1,10 @@
-import java.nio.charset.StandardCharsets
 
 plugins {
     id "java"
-    id "org.jetbrains.intellij" version "1.11.0"
+    id "org.jetbrains.intellij" version "1.15.0"
 }
 group 'org.taack'
-version '1.6.1'
+version '1.6.3'
 
 repositories {
     mavenCentral()
@@ -18,14 +17,15 @@ dependencies {
 // See https://github.com/JetBrains/gradle-intellij-plugin/
 
 intellij {
-    version = '2022.3.1'
+    type = 'IU'
+    version = '2023.2+'
     plugins = ['com.intellij.java', 'org.intellij.groovy']
 }
 
 // See https://lp.jetbrains.com/gradle-intellij-plugin/?_ga=2.137053042.394721671.1650106934-1691671707.1650106934
 patchPluginXml {
     changeNotes.set(provider {
-        """2022.X version.<br><em>Ensure Taack AST Transformations get completion</em>"""
+        """2023.X version.<br><em>Ensure Taack AST Transformations get completion</em>"""
     })
 }
 
