@@ -2,10 +2,8 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 
 plugins {
     id("java")
-    id("org.jetbrains.intellij.platform") version "2.0.0"
+    id("org.jetbrains.intellij.platform") version "2.0.1"
 }
-group "org.taack"
-version "1.6.6"
 
 repositories {
     mavenCentral()
@@ -26,7 +24,12 @@ dependencies {
         zipSigner()
         instrumentationTools()
 
-        version = "1.6.6"
+
+        version = "1.6.7"
         description = "Use with TaackUI Framework to recognize compiler extensions."
     }
+}
+
+intellijPlatform {
+    buildSearchableOptions = false
 }
