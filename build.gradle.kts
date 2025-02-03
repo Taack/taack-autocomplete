@@ -2,7 +2,7 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 
 plugins {
     id("java")
-    id("org.jetbrains.intellij.platform") version "2.0.1"
+    id("org.jetbrains.intellij.platform") version "2.2.1"
 }
 
 repositories {
@@ -25,7 +25,7 @@ dependencies {
         instrumentationTools()
 
 
-        version = "1.6.7"
+        version = "1.6.8"
         description = "Use with TaackUI Framework to recognize compiler extensions."
     }
 }
