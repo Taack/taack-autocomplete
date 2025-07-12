@@ -7,14 +7,18 @@ import com.intellij.psi.PsiModifier;
 import com.intellij.psi.impl.light.LightFieldBuilder;
 import com.intellij.psi.impl.light.LightMethodBuilder;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.plugins.groovy.lang.psi.api.statements.GrVariable;
 import org.jetbrains.plugins.groovy.transformations.AstTransformationSupport;
 import org.jetbrains.plugins.groovy.transformations.TransformationContext;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class TaackFieldEnumASTTransformationSupport implements AstTransformationSupport {
     static final String[] reservedNames = {"serialVersionUID", "self", "mapping", "constraints", "ui", "uiMap", "metaClass", "hasMany", "belongsTo"};
     static final String ORIGIN_INFO = "via @TaackEnumField";
+
+    static final boolean debug = false;
 
     @Override
     public void applyTransformation(@NotNull TransformationContext context) {
@@ -26,22 +30,38 @@ public class TaackFieldEnumASTTransformationSupport implements AstTransformation
 //                    context.addMethod(createGetterAccessorMethod(context.getCodeClass(), a));
 //                }
 //            }
-            var methods =  new ArrayList<>(context.getMethods());
-            for (var a : methods) {
-                final String name = a.getName();
-                if (name.startsWith("get") && !name.contains("_") && !name.contains("Solr") &&
-                        a.getParameterList().getParametersCount() == 0) {
-                    context.addMethod(createGetterAccessorMethod(context.getCodeClass(), a));
-                }
+            if (debug) {
+                System.out.println("============ context.getCodeClass().getQualifiedName() " + context.getCodeClass().getQualifiedName());
+                System.out.println("context.getFields()");
+                context.getFields().stream().map(GrVariable::getName).forEach(name -> {
+                    System.out.print(" name: " + name);
+                });
+                System.out.println(" ***");
+                System.out.println("getAllFields T: ");
+                context.getAllFields(true).stream().map(PsiField::getName).forEach(name -> {
+                    System.out.print(name + ", ");
+                });
+                System.out.println(" ***");
+                System.out.println("getAllFields F: ");
+                context.getAllFields(false).stream().map(PsiField::getName).forEach(name -> {
+                    System.out.print(name + ", ");
+                });
+                System.out.println(" ***");
+                System.out.println("getMethods: ");
+                context.getMethods().stream().map(PsiMethod::getName).forEach(name -> {
+                    System.out.print(name + ", ");
+                });
             }
 
-            for (var a : context.getFields()) {
-                final String name = a.getName();
+            var methodFields = new ArrayList<String>();
+
+            for (var field : context.getFields()) {
+                final String name = field.getName();
                 boolean addMethod = true;
                 for (var b : reservedNames) {
                     if (b.equals(name)) {
                         if (name.equals("belongsTo")) {
-                            for (var c : a.getInitializerGroovy().getChildren()) {
+                            for (var c : Objects.requireNonNull(field.getInitializerGroovy()).getChildren()) {
                                 LightFieldBuilder fieldBuilder = new LightFieldBuilder(c.getFirstChild().getText(), c.getLastChild().getText(), c);
                                 context.addMethod(createFieldInfoAccessorMethod(context.getCodeClass(), fieldBuilder));
                             }
@@ -50,10 +70,21 @@ public class TaackFieldEnumASTTransformationSupport implements AstTransformation
                         break;
                     }
                 }
-                if (addMethod && !(name.contains("_") || name.contains("$") || a.getType().getCanonicalText().contains("DetachedCriteria"))) {
-                    context.addMethod(createFieldInfoAccessorMethod(context.getCodeClass(), a));
+                if (addMethod && !(name.contains("_") || name.contains("$") || field.getType().getCanonicalText().contains("DetachedCriteria"))) {
+                    methodFields.add("get" + field.getName().substring(0, 1).toUpperCase() + field.getName().substring(1));
+                    context.addMethod(createFieldInfoAccessorMethod(context.getCodeClass(), field));
                 }
             }
+
+            var methods = new ArrayList<>(context.getMethods());
+            for (var method : methods) {
+                final String name = method.getName();
+                if (name.startsWith("get") && !name.contains("_") && !name.contains("Solr") &&
+                        method.getParameterList().getParametersCount() == 0 && !methodFields.contains(name)) {
+                    context.addMethod(createGetterAccessorMethod(context.getCodeClass(), method));
+                }
+            }
+
             context.addMethod(createSelfObjectMethod(context.getCodeClass()));
         }
     }
